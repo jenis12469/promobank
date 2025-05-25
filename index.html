@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PromoBank</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-emerald-100 min-h-screen flex items-center justify-center">
+
+  <div class="w-full max-w-md p-6 bg-white/80 backdrop-blur-md shadow-xl rounded-2xl border border-emerald-300">
+    <h1 class="text-3xl font-bold text-emerald-700 text-center mb-6">PromoBank</h1>
+
+    <!-- Карта -->
+    <div class="bg-emerald-600 text-white rounded-xl p-5 shadow-md mb-6">
+      <div class="text-sm uppercase">Номер карти</div>
+      <div id="cardNumber" class="text-lg font-mono tracking-widest mt-1 mb-4">0000 0000 0000 0000</div>
+      <div class="text-sm uppercase">Баланс</div>
+      <div id="balance" class="text-2xl font-bold">0 грн</div>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="flex justify-between gap-4 mb-6">
+      <button onclick="openTopUpModal()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-xl w-full">Поповнити</button>
+      <button onclick="openTransferModal()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-xl w-full">Переказати</button>
+    </div>
+
+    <!-- Історія -->
+    <div class="bg-gray-100 rounded-xl p-4 text-gray-600 text-sm">
+      <p class="text-center italic" id="history">Історія транзакцій поки що порожня</p>
+    </div>
+  </div>
+
+  <!-- Модалка поповнення -->
+  <div id="topUpModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-xl w-80 space-y-4">
+      <h2 class="text-lg font-semibold text-emerald-700">Поповнення</h2>
+      <input type="tel" id="phoneNumber" placeholder="Номер телефону" class="w-full p-2 border rounded" />
+      <input type="number" id="topUpAmount" placeholder="Сума (грн)" class="w-full p-2 border rounded" />
+      <div class="flex justify-end gap-2">
+        <button onclick="closeTopUpModal()" class="text-gray-500">Скасувати</button>
+        <button onclick="topUp()" class="bg-emerald-500 text-white px-4 py-2 rounded">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка переказу -->
+  <div id="transferModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-xl w-80 space-y-4">
+      <h2 class="text-lg font-semibold text-emerald-700">Переказ</h2>
+      <input type="text" id="targetCard" placeholder="Номер карти отримувача" class="w-full p-2 border rounded" />
+      <input type="number" id="transferAmount" placeholder="Сума (грн)" class="w-full p-2 border rounded" />
+      <div class="flex justify-end gap-2">
+        <button onclick="closeTransferModal()" class="text-gray-500">Скасувати</button>
+        <button onclick="transfer()" class="bg-emerald-500 text-white px-4 py-2 rounded">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Генератор номера карти
+    function generateCardNumber() {
+      const segments = [];
+      for (let i = 0; i < 4; i++) {
+        segments.push(Math.floor(1000 + Math.random() * 9000));
+      }
+      return segments.join(' ');
+    }
+
+    // Баланс и карта
+    let balance = 0;
+    const cardNumber = generateCardNumber();
+    document.getElementById('cardNumber').textContent = cardNumber;
+    document.getElementById('balance').textContent = `${balance} грн`;
+
+    // Модалки
+    function openTopUpModal() {
+      document.getElementById('topUpModal').classList.remove('hidden');
+    }
+
+    function closeTopUpModal() {
+      document.getElementById('topUpModal').classList.add('hidden');
+    }
+
+    function openTransferModal() {
+      document.getElementById('transferModal').classList.remove('hidden');
+    }
+
+    function closeTransferModal() {
+      document.getElementById('transferModal').classList.add('hidden');
+    }
+
+    // Пополнение
+    function topUp() {
+      const phone = document.getElementById('phoneNumber').value;
+      const amount = parseFloat(document.getElementById('topUpAmount').value);
+      if (!phone || isNaN(amount) || amount <= 0) {
+        alert('Введіть правильні дані');
+        return;
+      }
+      balance += amount;
+      document.getElementById('balance').textContent = `${balance} грн`;
+      document.getElementById('history').innerHTML = `+${amount} грн поповнення з телефону ${phone}<br>` + document.getElementById('history').innerHTML;
+      closeTopUpModal();
+    }
+
+    // Переказ
+    function transfer() {
+      const target = document.getElementById('targetCard').value;
+      const amount = parseFloat(document.getElementById('transferAmount').value);
+      if (!target || isNaN(amount) || amount <= 0 || amount > balance) {
+        alert('Неправильні дані або недостатньо коштів');
+        return;
+      }
+      balance -= amount;
+      document.getElementById('balance').textContent = `${balance} грн`;
+      document.getElementById('history').innerHTML = `-${amount} грн переказ на карту ${target}<br>` + document.getElementById('history').innerHTML;
+      closeTransferModal();
+    }
+  </script>
+
+</body>
+</html>
